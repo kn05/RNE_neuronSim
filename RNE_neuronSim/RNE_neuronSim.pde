@@ -1,9 +1,11 @@
 final int w = 800;
 final int h = 800;
-Pixel pixel[][] = new Pixel[w][h];
+final int time_max = 10000;
+Pixel pixel[][][] = new Pixel[w][h][time_max];
+int t = 0;
 PImage img;
 void setup(){
-  size(w, h);
+  size(800, 800);
   background(0);
   img=loadImage("neuron.png");
   imageMode(CENTER);
@@ -16,7 +18,9 @@ void setup(){
 }
 void draw(){
   
+
   
+  t++;
 }
 
 void diffusion(int i, int j){ //make diffusion of voltage
@@ -24,10 +28,20 @@ void diffusion(int i, int j){ //make diffusion of voltage
     println("out of range"+i+" : "+j);
     return;
   }
-  if(pixel[i][j].col != color(0, 0, 0)){
+  if(pixel[i][j][t].col != color(0, 0, 0)){
     //code
   }
 }
 
-void hh(){  //hodgkin-huxley model
+void hh(int i, int j, int t){  //hodgkin-huxley model
+  Pixel p1 = pixel[i][j][t];
+  Pixel p0 = pixel[i][j][t-1];
+  float Cm;
+  float Rm;
+  float I = Cm*dfdt(p0.vol, p1.vol) + ;
+
+}
+
+float dfdt(float x1, float x2){
+  return (x2-x1);
 }
