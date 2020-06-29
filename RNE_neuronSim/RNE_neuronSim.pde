@@ -1,70 +1,67 @@
-final int w = 600;
-final int h = 600;
-final int time_max = 10000;
-
-Pixel pixel[][][] = new Pixel[600][600][1000];
-float diffuse[][] = new float[600][600];
+final int w = 800;
+final int h = 800;
+final int n = 4;
+Pixel pixel[][] = new Pixel[800][800];
+float diffuse[][] = new float[800][800];
 int t = 0;
 PImage img;
 void setup() {
   size(800, 800);
   background(0);
-  img=loadImage("neuron.png");
+  img=loadImage("neu1.png");
   imageMode(CENTER);
-  image(img, width/2, height/2);
-  for (int i=0; i<w; i++) {
-    for (int j=0; j<h; j++) {
-      pixel[i][j][0] = new Pixel(); 
-      pixel[i][j][0].col = get(i, j);
-      if (pixel[i][j][0].col == color(0, 112, 192)) pixel[i][j][0].V = 70 ;
+  image(img, width/2, height/2, img.width/2.2, img.height/2.2);
+  noStroke();
+  for (int i=0; i<w; i+=n) {
+    for (int j=0; j<h; j+=n) {
+      pixel[i][j] = new Pixel(); 
+      pixel[i][j].col = get(i, j);
+      fill(pixel[i][j].col);
+      rect(i, j, n, n);
+      if (pixel[i][j].col == color(0, 112, 192)) pixel[i][j].V = 70 ;
       diffuse[i][j] = 0;
     }
   }
-  frameRate(24);
+  frameRate(120);
 }
 
 void draw() {
-  print(t+" ");
-  for (int i=0; i<w; i++) {
-    for (int j=0; j<h; j++) {
-      if (pixel[i][j][0].col == color(0, 0, 0)) continue;
-      if (t>0) {
-        pixel[i][j][t] = new Pixel();
-        pixel[i][j][t].col = pixel[i][j][t-1].col;
-      }
-      pixel[i][j][t].HH(diffuse[i][j]);
-      float V = pixel[i][j][t].V;
-      fill(255, 0, 0, V*2);
-      noStroke();
-      rect(i, j, 1, 1);
+  println(t+" ");
+  for (int i=0; i<w; i+=n) {
+    for (int j=0; j<h; j+=n) {
+      fill(pixel[i][j].col);
+      rect(i, j, n, n);
+    }
+  }
+  for (int i=0; i<w; i+=n) {
+    for (int j=0; j<h; j+=n) {
+      if (pixel[i][j].col == color(0, 0, 0)) continue;
+      pixel[i][j].HH(diffuse[i][j]); 
+      float V = pixel[i][j].V;
+      fill(240, 0, 250, V*2);
+      rect(i, j, n, n);
     }
   }
   diffusion();
-  //println(t++);
+  t++;
 }
 
 void diffusion() { //make diffusion of voltage
   float a[] = new float[4];
-  int dx[] = {1, -1, 0, 0};
-  int dy[] = {0, 0, 1, -1};
-  float D = 0.5;
-  for (int i=0; i<w; i++) {
-    for (int j=0; j<h; j++) {
-      if (pixel[i][j][0].col == color(255, 255, 255)) {
-        for (int k = 0; k<4; k++) {
-          int x = i+dx[k];
-          int y = j+dy[k];
-          if (x < 0 || y<0 || x>=w || y>=h ) return;
-          if (pixel[x][y][t].col == color(0, 0, 0)) return;
-          a[k] = pixel[x][y][t].V - pixel[i][j][t].V;
-        }
-        diffuse[i][j] = (a[0]+a[1]+a[2]+a[3])*D;
+  int dx[] = {n, -n, 0, 0};
+  int dy[] = {0, 0, n, -n};
+  float D = 0.9;
+  for (int i=0; i<w; i+=n) {
+    for (int j=0; j<h; j+=n) {
+      if (pixel[i][j].col == color(0, 0, 0)) continue;
+      for (int k = 0; k<4; k++) {
+        int x = i+dx[k];
+        int y = j+dy[k];
+        if (x < 0 || y<0 || x>=w || y>=h ) continue;
+        if (pixel[x][y].col == color(0, 0, 0)) continue;
+        a[k] = pixel[x][y].V - pixel[i][j].V;
       }
+      diffuse[i][j] = (a[0]+a[1]+a[2]+a[3])*D;
     }
   }
-}
-void mouseClicked() {
-  int x = mouseX;
-  int y = mouseY;
-  println(pixel[x][y][t].V);
 }

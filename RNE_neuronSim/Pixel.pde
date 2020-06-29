@@ -1,9 +1,9 @@
 class Pixel {
   color col;
   float V;
-  float dt = 0.05; //ms
+  float dt = 0.01; //ms
   float C = 1; //in muF/cm^2
-  float GKMax = 36;
+  float GKMax = 65;
   float GNaMax = 120;
   float EK = -12; //mV
   float ENa = 115;
@@ -14,9 +14,10 @@ class Pixel {
   float h = 0.60;
 
   Pixel() {
-    V = 0;
+    V = 1;
   }
   void HH(float Iinj) {  //
+    if(col != color(255,255,255)) return;
     float aN = alphaN(V);
     float bN = betaN(V);
     float aM = alphaM(V);
