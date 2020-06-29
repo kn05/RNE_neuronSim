@@ -18,8 +18,12 @@ void setup() {
       pixel[i][j].col = get(i, j);
       fill(pixel[i][j].col);
       rect(i, j, n, n);
-      if (pixel[i][j].col == color(0, 112, 192)) pixel[i][j].V = 70 ;
       diffuse[i][j] = 0;
+    }
+  }
+  for (int i=0; i<w; i+=n) {
+    for (int j=0; j<h; j+=n) {
+      if (pixel[i][j].col == color(0, 112, 192)) pixel[i][j].V = 40 ;
     }
   }
   frameRate(120);
@@ -64,4 +68,10 @@ void diffusion() { //make diffusion of voltage
       diffuse[i][j] = (a[0]+a[1]+a[2]+a[3])*D;
     }
   }
+}
+
+void mouseClicked() {
+  int x = mouseX;
+  int y = mouseY;
+  println(x, y);
 }
