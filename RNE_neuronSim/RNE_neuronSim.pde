@@ -66,8 +66,6 @@ void draw() {
       }
     }
   }
-  fill(255, 30);
-  rect(width/2, height/2, 20, 20);
   diffusion();
   t++;
 }
