@@ -1,7 +1,6 @@
 class Pixel {
   color col;
   float V;
-  float dt = 0.005; //ms
   float C = 1; //in muF/cm^2
   float GKMax = 49;
   float GNaMax = 120;
@@ -12,10 +11,18 @@ class Pixel {
   float n = 0.32;
   float m = 0.05;
   float h = 0.60;
-
+  float Vlim = 40;
+  
   Pixel() {
     V = 1;
   }
+  
+  boolean NT(){
+    if(col != red) return false;
+    if(V > Vlim) return true;
+    else return false;
+  }
+  
   void HH(float Iinj) {  //
     if(col == color(0,0,0)) return;
     if(col != color(255,255,255)){
