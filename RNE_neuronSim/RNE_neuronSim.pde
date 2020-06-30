@@ -17,7 +17,7 @@ void setup() {
   background(0);
   img=loadImage("neu1.png");
   imageMode(CENTER);
-  image(img, width/2, height/2, img.width/2.2, img.height/2.2);
+  image(img, width/2, height/2, img.width/2.5, img.height/2.5);
   noStroke();
   for (int i=0; i<w; i+=n) {
     for (int j=0; j<h; j+=n) {
@@ -49,6 +49,7 @@ void draw() {
         if (V<0) fill(0, 0, 150, -V*16);
         rect(i, j, n, n);
       } else {
+        nt[i][j] *= 0.99;
         fill(255, 255, 0, nt[i][j]);
         rect(i, j, n, n);
       }
