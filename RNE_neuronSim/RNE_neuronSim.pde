@@ -7,11 +7,14 @@ float nt[][] = new float[800][800];
 float R = 1;
 int t = 0;
 float dt = 0.005; //ms
+int gx, gy;
 int dx[] = {n, -n, 0, 0};
 int dy[] = {0, 0, n, -n};
 
+float g[] = new float[10000];
+
 color white = color(255, 255, 255);
-color black = color(0, 0 ,0);
+color black = color(0, 0, 0);
 color red = color(255, 0, 0);
 color blue = color(0, 112, 192);
 color gray = color(120);
@@ -45,21 +48,6 @@ void draw() {
     for (int j=0; j<h; j+=n) {
       fill(pixel[i][j].col);
       rect(i, j, n, n);
-    }
-  }
-  for (int i=0; i<w; i+=n) {
-    for (int j=0; j<h; j+=n) {
-      if (pixel[i][j].col != black) { //white
-        pixel[i][j].HH(diffuse[i][j]); 
-        float V = pixel[i][j].V;
-        if (V>0) fill(150, 0, 0, 2*V);
-        if (V<0) fill(0, 0, 150, -V*16);
-        rect(i, j, n, n);
-      }
-      else if(pixel[i][j].col == black){
-        fill(255, 255, 0, 1000*nt[i][j]);
-        rect(i, j, n, n);
-      }
       if (pixel[i][j].col == blue) {
         float nts=0;
         for (int k = 0; k<4; k++) {
@@ -69,7 +57,23 @@ void draw() {
           if (pixel[x][y].col == black) nts += nt[x][y];
         }
         pixel[i][j].NTin(nts);
-        if(nts != 0) println(nts);
+      }
+    }
+  }
+  diffusion();
+
+  for (int i=0; i<w; i+=n) {
+    for (int j=0; j<h; j+=n) {
+      if (pixel[i][j].col != black) {
+        pixel[i][j].HH(diffuse[i][j]); 
+        float V = pixel[i][j].V;
+        if (V>0) fill(150, 0, 0, 2*V);
+        if (V<0) fill(0, 0, 150, -V*16);
+        rect(i, j, n, n);
+      } else if (pixel[i][j].col == black) {
+        fill(255, 255, 0, 1000*nt[i][j]);
+        rect(i, j, n, n);
+        nt[i][j] *= 0.999;
       }
     }
   }
@@ -80,18 +84,17 @@ void draw() {
           int x = i+dx[k];
           int y = j+dy[k];
           if (x < 0 || y<0 || x>=w || y>=h ) continue;
-          if (pixel[x][y].col == color(0)) nt[x][y] += 0.50 * dt;
+          if (pixel[x][y].col == color(0)) nt[x][y] += 0.050 * dt;
         }
       }
     }
   }
-  
-  diffusion();
+  graph();
   t++;
 }
 
 void diffusion() { //make diffusion of voltage
-  float D = 0.8;
+  float D = 0.2;
   float nt_old[][] = new float[800][800];
   arrayCopy(nt, nt_old);
   for (int i=0; i<w; i+=n) {
@@ -106,8 +109,7 @@ void diffusion() { //make diffusion of voltage
           a[k] =nt_old[x][y] - nt_old[i][j];
         }
         nt[i][j] += (a[0]+a[1]+a[2]+a[3])*D*dt;
-      } 
-      else {
+      } else {
         for (int k = 0; k<4; k++) {
           int x = i+dx[k];
           int y = j+dy[k];
@@ -116,31 +118,55 @@ void diffusion() { //make diffusion of voltage
           a[k] = pixel[x][y].V - pixel[i][j].V;
         }
         diffuse[i][j] = (a[0]+a[1]+a[2]+a[3])*D;
+        if (Float.isNaN(diffuse[i][j])) {
+          for (int k = 0; k<4; k++) {
+            int x = i+dx[k];
+            int y = j+dy[k];
+            a[k] = pixel[x][y].V - pixel[i][j].V;
+          }
+        }
       }
     }
   }
 }
 
-void graph(){
+void graph() {
   fill(180);
-  rect(0, 0, 600, 150);
+  t= t%(4*w);
+  rect(0, 0, w, 250);
+  fill(0, 0, 255);
+  g[t%(4*w)] = pixel[gx][gy].V;
+  for(int i=0; i<w; i++){
+    rect(i, 150-g[4*i], 1, 1);
+  }
+  stroke(1);
+  line(t/4, 0, t/4, 250);
+  noStroke();
 }
 
 void mouseClicked() {
   int x = mouseX;
   int y = mouseY;
   pixel[(x/n)*n][(y/n)*n].V += 100;
-  nt[(x/n)*n][(y/n)*n] += 0.4;
+  nt[(x/n)*n][(y/n)*n] += 0.04;
 }
 
-color determineColor(color c){
+void keyPressed() {
+  int x = mouseX;
+  int y = mouseY;
+  gx = (x/n)*n;
+  gy = (y/n)*n;
+  t=0;
+}
+
+color determineColor(color c) {
   float a[] = {0, 0, 0, 0, 0};
   int ans = 0;
-  for(int i=0; i<5; i++){
+  for (int i=0; i<5; i++) {
     a[i] = pow((red(c) - red(palate[i])), 2) + pow((green(c) - green(palate[i])), 2) + pow((blue(c) - blue(palate[i])), 2);
   }
-  for(int i=0; i<5; i++){
-    if(a[i] == min(a)) ans = i;
+  for (int i=0; i<5; i++) {
+    if (a[i] == min(a)) ans = i;
   }
   return palate[ans];
 }
