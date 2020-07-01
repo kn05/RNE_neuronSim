@@ -11,23 +11,30 @@ class Pixel {
   float n = 0.32;
   float m = 0.05;
   float h = 0.60;
-  float Vlim = 40;
+  float Vlim = 20;
   
   Pixel() {
     V = 1;
   }
   
-  boolean NT(){
+  boolean NTout(){
     if(col != red) return false;
     if(V > Vlim) return true;
     else return false;
   }
   
-  void HH(float Iinj) {  //
-    if(col == color(0,0,0)) return;
-    if(col != color(255,255,255)){
-      V += Iinj * dt;
+  void NTin(float O){
+    float g = 10;
+    float Ent = -10;
+    if(col == blue) {
+      V = g*O*(V-Ent)/R;
     }
+    return;
+  }
+  
+  void HH(float Iinj) {  //
+    if(col == black) return;
+    if(col == white){
     float aN = alphaN(V);
     float bN = betaN(V);
     float aM = alphaM(V);
@@ -35,31 +42,27 @@ class Pixel {
     float aH = alphaH(V);
     float bH = betaH(V);
 
-    float tauN = 1 / (aN + bN);
-    float tauM = 1 / (aM + bM);
-    float tauH = 1 / (aH + bH);
-    float nInf = aN * tauN;
-    float mInf = aM * tauM;
-    float hInf = aH * tauH;
-
-    n += dt / tauN * (nInf - n);
-    m += dt / tauM * (mInf - m);
-    h += dt / tauH * (hInf - h);
+    n += (aN * (1-n) - bN * n) * dt;
+    m += (aM * (1-m) - bM * m) * dt;
+    h += (aH * (1-h) - bH * h) * dt;
+    
     float INa = GNaMax * m * m * m * h * (ENa - V);
     float IK = GKMax * n * n * n * n * (EK - V);
     float Im = Gm * (VRest - V);
-
+    
     V += (1 / C) * (INa + IK + Im + Iinj) * dt;
+    }
+    else V += Iinj * dt;
   }
   float alphaN(float V) {
-    if (V==10) return alphaN(V+0.001); // 0/0 -> NaN
+    if (V==10) return alphaN(V+1e-8); // 0/0 -> NaN
     return (10-V) / (100*(exp((10-V)/10)-1));
   }
   float betaN(float V) {
     return 0.125 * exp(-V/80);
   }
   float alphaM(float V) {
-    if (V==25) return alphaM(V+0.001);  // 0/0 -> NaN
+    if (V==25) return alphaM(V+1e-8);  // 0/0 -> NaN
     return (25-V) / (10 * (exp((25-V)/10)-1));
   }
   float betaM(float V) {
