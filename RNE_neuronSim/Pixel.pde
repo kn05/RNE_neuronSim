@@ -2,8 +2,8 @@ class Pixel {
   color col;
   float V;
   float C = 1; //in muF/cm^2
-  float GKMax = 49;
-  float GNaMax = 120;
+  float GKMax = 40;
+  float GNaMax = 140;
   float EK = -12; //mV
   float ENa = 115;
   float Gm = 0.3;
@@ -24,7 +24,7 @@ class Pixel {
   }
 
   void NTin(float O) {
-    float g = 80;
+    float g = 47;
     float Ent = -10;
     if (col == blue) {
       V += (g*O*(V-Ent)/R)*dt;

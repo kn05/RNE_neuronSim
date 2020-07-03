@@ -1,12 +1,19 @@
-final int w = 800;
-final int h = 800;
-final int n = 12;
-Pixel pixel[][] = new Pixel[800][800];
-float diffuse[][] = new float[800][800];
-float nt[][] = new float[800][800];
-float R = 1;
+import uibooster.*;
+UiBooster File;
+UiBooster Mag;
+UiBooster H;
+UiBooster W;
+
+final int w = 600;
+final int h = 600;
+final int n = 5;
+Pixel pixel[][] = new Pixel[600][600];
+float diffuse[][] = new float[600][600];
+float nt[][] = new float[600][600];
+
 int t = 0;
-float dt = 0.005; //ms
+float dt = 0.0075; //ms
+float R = 1;
 int gx, gy;
 int dx[] = {n, -n, 0, 0};
 int dy[] = {0, 0, n, -n};
@@ -23,11 +30,22 @@ color palate[] = {white, black, red, blue, gray};
 
 PImage img;
 void setup() {
-  size(800, 800);
+  size(600, 600);
   background(0);
-  img=loadImage("2.png");
+  File = new UiBooster();
+  String filename = File.showTextInputDialog("filename?");
+  img=loadImage(filename);
   imageMode(CENTER);
-  image(img, width/2, height/2, img.width*3, img.height*3);
+  Mag = new UiBooster();
+  String mag =Mag.showTextInputDialog("Magnification of image?");
+  float m = float(mag);
+  H = new UiBooster();
+  String Hig =H.showTextInputDialog("Number of pixels to move on the vertical axis?");
+  float hig = float(Hig);
+  W = new UiBooster();
+  String Wid =W.showTextInputDialog("Number of pixels to move on the horizontal axis?");
+  float wid = float(Wid);
+  image(img, width/2+wid, height/2+hig, img.width*m, img.height*m);
   noStroke();
   for (int i=0; i<w; i+=n) {
     for (int j=0; j<h; j+=n) {
@@ -60,6 +78,7 @@ void draw() {
       }
     }
   }
+  
   diffusion();
 
   for (int i=0; i<w; i+=n) {
@@ -71,7 +90,7 @@ void draw() {
         if (V<0) fill(0, 0, 150, -V*16);
         rect(i, j, n, n);
       } else if (pixel[i][j].col == black) {
-        fill(255, 255, 0, 1000*nt[i][j]);
+        fill(255, 255, 0, 5000*nt[i][j]);
         rect(i, j, n, n);
         nt[i][j] *= 0.999;
       }
@@ -84,17 +103,23 @@ void draw() {
           int x = i+dx[k];
           int y = j+dy[k];
           if (x < 0 || y<0 || x>=w || y>=h ) continue;
-          if (pixel[x][y].col == color(0)) nt[x][y] += 0.050 * dt;
+          if (pixel[x][y].col == color(0)) nt[x][y] += 2.0 * dt;
         }
       }
     }
   }
+
+  strokeWeight(2);
+  stroke(94, 182, 180);
+  fill(0, 0);
+  rect(gx, gy, n, n);
+
   graph();
   t++;
 }
 
 void diffusion() { //make diffusion of voltage
-  float D = 0.2;
+  float D = 0.7;
   float nt_old[][] = new float[800][800];
   arrayCopy(nt, nt_old);
   for (int i=0; i<w; i+=n) {
@@ -133,31 +158,31 @@ void diffusion() { //make diffusion of voltage
 void graph() {
   fill(180);
   t= t%(4*w);
-  rect(0, 0, w, 250);
+  rect(0, 0, w, 150);
   fill(0, 0, 255);
   g[t%(4*w)] = pixel[gx][gy].V;
-  for(int i=0; i<w; i++){
-    rect(i, 150-g[4*i], 1, 1);
+  for (int i=0; i<w; i++) {
+    rect(i, 110-g[4*i], 1, 1);
   }
   stroke(1);
-  line(t/4, 0, t/4, 250);
+  line(t/4, 0, t/4, 150);
   noStroke();
 }
 
 void mouseClicked() {
   int x = mouseX;
   int y = mouseY;
-  pixel[(x/n)*n][(y/n)*n].V += 100;
-  nt[(x/n)*n][(y/n)*n] += 0.04;
+  if (mouseButton == LEFT) {
+    pixel[(x/n)*n][(y/n)*n].V += 100;
+    nt[(x/n)*n][(y/n)*n] += 0.04;
+  } else if (mouseButton == RIGHT) {
+    gx = (x/n)*n;
+    gy = (y/n)*n;
+    t=0;
+  } else {
+  }
 }
 
-void keyPressed() {
-  int x = mouseX;
-  int y = mouseY;
-  gx = (x/n)*n;
-  gy = (y/n)*n;
-  t=0;
-}
 
 color determineColor(color c) {
   float a[] = {0, 0, 0, 0, 0};
